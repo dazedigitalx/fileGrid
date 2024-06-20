@@ -1,0 +1,49 @@
+/* client/src/Login.css */
+
+.card {
+  display: flex;
+  width: 600px;
+  margin: 50px auto;
+  border: 1px solid #ccc;
+  border-radius: 40px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.card-image {
+  flex: 1;
+  background-image: url('./images/login_board.jpg'); /* Update with your image path */
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0; /* Remove padding from the image */
+  margin: 0; /* Remove margin from the image */
+}
+
+.card-welcome {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.0); /* Semi-transparent background for better readability */
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.card-welcome h1 {
+  color: white;
+  font-size: 2em;
+  margin: 0;
+}
+
+.card-content {
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: transparent;
+}

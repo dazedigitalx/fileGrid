@@ -1,0 +1,39 @@
+nav {
+  background-color: #333;
+  color: #fff;
+  padding: 10px;
+  display: flex;
+  justify-content: center; /* Ensures items are spread across the nav horizontally */
+  align-items: center; /* Centers items vertically within the nav */
+}
+
+nav ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex; /* Display list items horizontally */
+  align-items: center; /* Center items vertically */
+}
+
+nav ul li {
+  margin-left: 10px; /* Adjust spacing between menu items */
+}
+
+nav ul li a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.user-info {
+  display: flex;
+  align-items: center; /* Align items vertically within user-info */
+}
+
+.user-info p {
+  margin: 0; /* Remove default margin */
+  margin-right: 10px; /* Add spacing between user-info items */
+}
+
+.user-info p:first-child {
+  margin-left: 10px; /* Adjust spacing for the first child */
+}
