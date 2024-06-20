@@ -1,5 +1,6 @@
 {
   "name": "client",
+  "homepage": "http://vau7t.com",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
