@@ -14,12 +14,7 @@ const Sidebar = ({ collapsed, toggleSidebar, onChannelSelect }) => {
                 {!collapsed && (
                     <>
                         <h1>Sidebar</h1>
-                        <ul>
-                            <li><Link to="/">Home</Link></li>
-                            <li><Link to="/login">Login</Link></li>
-                            <li><Link to="/signup">Signup</Link></li>
-                            <li><Link to="/dashboard">Dashboard</Link></li>
-                        </ul>
+
                         <Channels onChannelSelect={onChannelSelect} />
                     </>
                 )}
