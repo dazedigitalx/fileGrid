@@ -1,0 +1,7 @@
+.dashboard-container {
+    flex-grow: 1;
+    transition: margin-left 0.3s ease; /* Smooth transition for margin change */
+}
+
+
+

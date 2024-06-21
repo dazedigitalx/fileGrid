@@ -25,13 +25,25 @@
 
 .card-welcome {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  width: 100%;
-  background-color: rgba(0, 0, 0, 0.0); /* Semi-transparent background for better readability */
-  padding: 20px;
-  border-radius: 8px;
 }
+
+.register-button {
+  background-color: #007bff;
+  color: #fff;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.register-button:hover {
+  background-color: #0056b3;
+}
+
 
 .card-welcome h1 {
   color: white;
@@ -47,3 +59,4 @@
   justify-content: center;
   background-color: transparent;
 }
+

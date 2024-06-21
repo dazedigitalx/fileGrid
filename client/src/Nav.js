@@ -29,7 +29,7 @@ const Nav = () => {
             <ul>
                 <li>
                     <div className="user-info">
-                        <p>Welcome {user.username}</p>
+                        <p>Welcome User :  {user.username}</p>
                         <p>ID: {user.id}</p>
                         <p>Email: {user.email}</p>
                         <p>Role: {user.role}</p>

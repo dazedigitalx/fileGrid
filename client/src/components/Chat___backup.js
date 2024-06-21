@@ -13,7 +13,7 @@ const Chat = ({ user }) => {
         setLoading(true);
         setError(null); // Clear previous error
         try {
-            const response = await fetch('http://localhost:5000/api/chat/', {
+            const response = await fetch('http://localhost:5000/api/chat/messages', {
                 headers: {
                     'Authorization': `Bearer ${user.token}`,
                     'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ const Chat = ({ user }) => {
 
     const handleSendMessage = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/chat/', {
+            const response = await fetch('http://localhost:5000/api/chat/messages', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${user.token}`,
@@ -57,17 +57,21 @@ const Chat = ({ user }) => {
                 },
                 body: JSON.stringify({
                     userId: user.id,
-                    content: newMessage,
-                    created_at: new Date().toISOString(), // Example timestamp
+                    senderId: user.id, // Assuming senderId is the same as userId
+                    recipientId: user.id, // Replace with recipientId if available
+                    message: newMessage,
+                    created_at: new Date().toISOString(),
                 }),
             });
 
             if (response.ok) {
                 console.log('Message sent successfully');
                 const sentMessage = {
-                    id: Date.now(), // Assuming the server returns an ID, use that instead
-                    content: newMessage,
+                    id: Date.now(), // Generate a unique id for the new message
                     userId: user.id,
+                    senderId: user.id,
+                    recipientId: user.id, // Replace with actual recipientId if available
+                    message: newMessage,
                     created_at: new Date().toISOString(),
                 };
                 setChatMessages([...chatMessages, sentMessage]); // Update state with new message
@@ -80,27 +84,27 @@ const Chat = ({ user }) => {
         }
     };
 
-    // const handleDeleteMessage = async (messageId) => {
-    //     try {
-    //         const response = await fetch(`http://localhost:5000/api/chat/messages/${messageId}`, {
-    //             method: 'DELETE',
-    //             headers: {
-    //                 'Authorization': `Bearer ${user.token}`,
-    //             },
-    //         });
+    const handleDeleteMessage = async (messageId) => {
+        try {
+            const response = await fetch(`http://localhost:5000/api/chat/messages/${messageId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${user.token}`,
+                },
+            });
 
-    //         if (response.ok) {
-    //             console.log('Message deleted successfully');
-    //             // Remove the deleted message from state
-    //             const updatedMessages = chatMessages.filter(message => message.id !== messageId);
-    //             setChatMessages(updatedMessages);
-    //         } else {
-    //             console.error('Failed to delete message:', response.statusText);
-    //         }
-    //     } catch (error) {
-    //         console.error('Error deleting message:', error);
-    //     }
-    // };
+            if (response.ok) {
+                console.log('Message deleted successfully');
+                // Remove the deleted message from state
+                const updatedMessages = chatMessages.filter(message => message.id !== messageId);
+                setChatMessages(updatedMessages);
+            } else {
+                console.error('Failed to delete message:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error deleting message:', messageId);
+        }
+    };
 
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
@@ -109,6 +113,7 @@ const Chat = ({ user }) => {
     };
 
     return (
+        <div className="chat-content">
         <div className="chat-container">
             <div className="messages-container">
                 {loading ? (
@@ -118,12 +123,12 @@ const Chat = ({ user }) => {
                 ) : (
                     chatMessages.map(message => (
                         <div key={message.id} className="message">
-                            <div className="message-content">{message.content}</div>
+                            <div className="message-content">{message.message}</div>
                             <div className="message-info">
                                 <span className="message-user-id">From User ID: {message.userId}</span>
                                 <span className="message-timestamp">Timestamp: {message.created_at}</span>
-                                {/* <button onClick={() => handleDeleteMessage(message.id)} className="delete-button">Delete</button> */}
-                            </div>
+                                <button onClick={() => handleDeleteMessage(message.id) } className="delete-button">x</button>
+                                </div>
                         </div>
                     ))
                 )}
@@ -141,7 +146,8 @@ const Chat = ({ user }) => {
                 <button onClick={handleSendMessage} className="send-button">Send</button>
             </div>
         </div>
-    );
+        </div>
+    );QD
 };
 
 export default Chat;

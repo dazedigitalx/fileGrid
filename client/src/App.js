@@ -6,7 +6,6 @@ import PrivateRoute from './PrivateRoute';
 import Dashboard from './components/Dashboard';
 import Login from './Login';
 import Signup from './Signup';
-import Nav from './Nav';
 import Home from './Home';
 // import Users from './components/Users';
 import './App.css';
@@ -16,7 +15,7 @@ const App = () => {
     <Router>
       <AuthProvider>
         <div className="App">
-          <Nav />
+
 
           {/* Routes for main content */}
           <Routes>

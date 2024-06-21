@@ -3,8 +3,13 @@ nav {
   color: #fff;
   padding: 10px;
   display: flex;
-  justify-content: center; /* Ensures items are spread across the nav horizontally */
-  align-items: center; /* Centers items vertically within the nav */
+  justify-content: center; /* Center items horizontally */
+  align-items: center; /* Center items vertically */
+  width: 100%; /* Full width */
+  position: fixed; /* Fixed position to keep it at the top */
+  top: 0; /* Align at the top */
+  left: 0; /* Align at the left */
+  z-index: 1000; /* Ensure it's above other content */
 }
 
 nav ul {
