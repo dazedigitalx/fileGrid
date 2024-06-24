@@ -5,7 +5,6 @@
   "homepage": "http://vau7t.comn",
   "scripts": {
     "start": "react-scripts start",
-    "buildx": "react-scripts build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "eject": "react-scripts eject"
   },
