@@ -1,48 +1,51 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../AuthContext';
-import Chat from '../components/Chat';
-import Nav from '../Nav';
-import Sidebar from '../components/Sidebar';
-import './Dashboard.css'; // Import your Dashboard specific CSS file for styling
-import Channels from '../components/Channels';
-import NewChannelForm from '../components/NewChannelForm';
+import React, { useState } from 'react';
+import Header from './Header';
+import Sidebar from './Sidebar';
+import Channels from './Channels'; // Import Channels module
+import Chat from './Chat'; // Import Chat component
+import './Dashboard.css'; // Ensure correct import path for CSS
 
 const Dashboard = () => {
-    const { user, fetchUserDetails, loading } = useAuth();
-    const [collapsed, setCollapsed] = useState(false); // State for sidebar collapse/expand
-    const [selectedChannel, setSelectedChannel] = useState('General'); // State for selected channel
+    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [activeChannel, setActiveChannel] = useState(null); // State to track active channel
+    const [channels, setChannels] = useState([]); // State to store channels
 
+    // Function to toggle sidebar visibility
     const toggleSidebar = () => {
-        setCollapsed(!collapsed);
+        setSidebarOpen(!sidebarOpen);
     };
 
-    const handleChannelSelect = (channel) => {
-        setSelectedChannel(channel);
+    // Function to handle creation of a new channel
+    const handleCreateChannel = () => {
+        // Example: Generate a new channel
+        const newChannel = {
+            id: channels.length + 1,
+            name: `Channel ${channels.length + 1}`,
+            description: `Description for Channel ${channels.length + 1}`,
+        };
+
+        // Update channels state with the new channel
+        setChannels([...channels, newChannel]);
+
+        // Set the new channel as active
+        setActiveChannel(newChannel);
     };
-
-    useEffect(() => {
-        if (!user) {
-            fetchUserDetails();
-        }
-    }, [user, fetchUserDetails]);
-
-    if (loading) {
-        return <div>Loading...</div>; // Display a loading indicator while fetching user details
-    }
 
     return (
-        <div>
-            <Nav />
-            <Sidebar collapsed={collapsed} toggleSidebar={toggleSidebar} onChannelSelect={handleChannelSelect} />
-            <div className="dashboard-container">
-                <div className={`main-content ${collapsed ? 'collapsed' : ''}`}>
-                    <button className="toggle-button" onClick={toggleSidebar}>
-                        {collapsed ? <>&#9654;</> : <>&#9660;</>}
-                    </button>
-                    <h1>Welcome, {user.name}</h1>
-            <Channels />
-            <NewChannelForm />
-                    {user ? <Chat user={user} channel={selectedChannel} /> : <div>Please log in to access the chat.</div>}
+        <div className="dashboard">
+            <Sidebar
+                isOpen={sidebarOpen}
+                toggleSidebar={toggleSidebar}
+                channels={channels}
+                passActiveChannel={setActiveChannel}
+                handleCreateChannel={handleCreateChannel}
+            />
+            <div className={`dashboard-content ${sidebarOpen ? 'expanded' : ''}`}>
+                <Header />
+                <div className={`dashboard-main ${sidebarOpen ? '' : 'contracted'}`}>
+                    <h2>Welcome to Dashboard</h2>
+                    <Channels channels={channels} setActiveChannel={setActiveChannel} />
+                    {activeChannel && <Chat channel={activeChannel} />}
                 </div>
             </div>
         </div>

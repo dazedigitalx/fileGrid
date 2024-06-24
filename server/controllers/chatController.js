@@ -1,116 +1,125 @@
 // chatController.js
 
-const pool = require('../database'); // Adjust path as per your project structure
+const pool = require('../database');
+
+// GET /api/channels/:channelId
+const getChannelById = async (req, res) => {
+    const { channelId } = req.params;
+    try {
+        const [channels] = await pool.query('SELECT * FROM Channels WHERE id = ?', [channelId]);
+        if (channels.length === 0) {
+            return res.status(404).json({ error: 'Channel not found' });
+        }
+        res.json(channels[0]);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch channel' });
+    }
+};
 
 // GET messages for a specific channel
 const getChannelMessages = async (req, res) => {
-  const channelId = req.params.channelId;
-  try {
-    const query = 'SELECT * FROM messages WHERE channel_id = ?';
-    const [rows] = await pool.promise().query(query, [channelId]);
-    res.status(200).json(rows);
-  } catch (error) {
-    console.error('Error fetching channel messages:', error);
-    res.status(500).json({ message: 'Failed to fetch channel messages.' });
-  }
+    const channelId = req.params.channelId;
+    try {
+        const [rows] = await pool.query('SELECT * FROM Messages WHERE channel_id = ?', [channelId]);
+        res.status(200).json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch channel messages.' });
+    }
 };
 
 // GET /api/channels - Fetch channels for a user
 const getChannels = async (req, res) => {
-  try {
-    const [rows] = await pool.promise().query('SELECT * FROM channels');
-    res.status(200).json(rows);
-  } catch (error) {
-    console.error('Error fetching channels:', error);
-    res.status(500).json({ message: 'Failed to fetch channels.' });
-  }
+    try {
+        const [rows] = await pool.query('SELECT * FROM Channels');
+        res.status(200).json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch channels.' });
+    }
 };
 
 // POST /api/channels - Create a new channel
 const createChannel = async (req, res) => {
-  const { name, description } = req.body; // Assuming name and description are provided in req.body
-  try {
-    const query = 'INSERT INTO channels (name, description) VALUES (?, ?)';
-    await pool.promise().execute(query, [name, description]);
-    res.status(201).json({ message: 'Channel created successfully' });
-  } catch (error) {
-    console.error('Error creating channel:', error);
-    res.status(500).json({ message: 'Failed to create channel.' });
-  }
-};
+    const { name } = req.body;
+    const creator_id = req.user.id;
 
-/////// messages ..................................
-
-const createMessage = async (req, res) => {
-  const { userId, senderId, recipientId, message, created_at } = req.body; // Assuming all fields are provided in req.body
-  try {
-    const query = 'INSERT INTO messages (userId, senderId, recipientId, message, created_at) VALUES (?, ?, ?, ?, ?)';
-    await pool.promise().execute(query, [userId, senderId, recipientId, message, created_at]);
-    res.status(201).json({ message: 'Chat message created successfully' });
-  } catch (error) {
-    console.error('Error creating chat message:', error);
-    res.status(500).json({ message: 'Failed to create chat message.' });
-  }
-};
-
-
-
-const getAllMessages = async (req, res) => {
-  try {
-    const [rows] = await pool.promise().query('SELECT * FROM messages');
-    res.status(200).json(rows);
-  } catch (error) {
-    console.error('Error fetching notes:', error);
-    res.status(500).json({ message: 'Failed to fetch notes.' });
-  }
-};
-
-// DELETE a chat message by ID
-const deleteMessage = async (req, res) => {
-  const messageId = parseInt(req.params.messageId);
-
-  try {
-    // Example SQL query to delete a message by its ID
-    const query = 'DELETE FROM messages WHERE id = ?';
-    const [result] = await pool.promise().execute(query, [messageId]);
-
-    if (result.affectedRows > 0) {
-      res.json({ message: `Message with ID ${messageId} deleted successfully` });
-    } else {
-      res.status(404).json({ error: `Message with ID ${messageId} not found` });
+    if (!name || !creator_id) {
+        return res.status(400).json({ message: 'Name and userId are required' });
     }
-  } catch (error) {
-    console.error('Error deleting message:', error);
-    res.status(500).json({ message: 'Failed to delete message' });
-  }
+
+    try {
+        await pool.query('INSERT INTO Channels (name, creator_id) VALUES (?, ?)', [name, creator_id]);
+        res.status(201).json({ message: 'Channel created successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to create channel.' });
+    }
 };
 
-// GET a specific chat message by ID
+// POST /api/messages - Create a new message
+const createMessage = async (req, res) => {
+    const { channelId, content } = req.body;
+    const userId = req.user.id;
+
+    if (!channelId || !content) {
+        return res.status(400).json({ message: 'Channel ID and content are required' });
+    }
+
+    try {
+        await pool.query('INSERT INTO Messages (channel_id, user_id, content) VALUES (?, ?, ?)', [channelId, userId, content]);
+        res.status(201).json({ message: 'Message created successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to create message.' });
+    }
+};
+
+// GET /api/messages - Get all messages
+const getAllMessages = async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM Messages');
+        res.status(200).json(rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch messages.' });
+    }
+};
+
+// DELETE /api/messages/:messageId - Delete a message
+const deleteMessage = async (req, res) => {
+    const messageId = req.params.messageId;
+
+    try {
+        const [result] = await pool.query('DELETE FROM Messages WHERE id = ?', [messageId]);
+        if (result.affectedRows > 0) {
+            res.json({ message: `Message with ID ${messageId} deleted successfully` });
+        } else {
+            res.status(404).json({ error: `Message with ID ${messageId} not found` });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete message' });
+    }
+};
+
+// GET /api/messages/:messageId - Get a message by ID
 const getMessageById = async (req, res) => {
-  const messageId = parseInt(req.params.messageId);
-  try {
-      const [rows] = await pool.promise().query('SELECT * FROM messages WHERE id = ?', [messageId]);
+    const messageId = req.params.messageId;
 
-      if (rows.length > 0) {
-          res.json(rows[0]); // Assuming you expect only one message with the given ID
-      } else {
-          res.status(404).json({ error: `Message with ID ${messageId} not found` });
-      }
-  } catch (error) {
-      console.error('Error fetching message:', error);
-      res.status(500).json({ message: 'Failed to fetch message' });
-  }
+    try {
+        const [rows] = await pool.query('SELECT * FROM Messages WHERE id = ?', [messageId]);
+        if (rows.length > 0) {
+            res.json(rows[0]);
+        } else {
+            res.status(404).json({ error: `Message with ID ${messageId} not found` });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch message' });
+    }
 };
 
-
-
-
-module.exports = { 
-  createMessage , 
-  getAllMessages , 
-  deleteMessage, 
-  getMessageById, 
-  getChannels,
-  createChannel,
-  getChannelMessages 
-  };
+module.exports = {
+    getChannelById,
+    getChannelMessages,
+    getChannels,
+    createChannel,
+    createMessage,
+    getAllMessages,
+    deleteMessage,
+    getMessageById
+};

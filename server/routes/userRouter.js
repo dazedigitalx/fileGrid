@@ -1,26 +1,20 @@
 const express = require('express');
+const authMiddleware = require('../middlewares/authMiddleware'); // Ensure you have authentication middleware set up
+
+
+const { registerUser, loginUser } = require('../controllers/userController');
+const { getCurrentUser } = require('../controllers/userController'); // Import your controller function
+
+
 const router = express.Router();
-const authMiddleware = require('../middlewares/authMiddleware'); // Adjust the path as per your actual file structure
-const {
-    getCurrentUser,
-    loginUser,
-    getAllUsers,
-    getUserById,
-    createUser,
-    updateUserById,
-    deleteUserById,
-} = require('../controllers/userController'); // Adjust the path as per your actual file structure
 
-// Apply authMiddleware to routes that need authentication
-router.get('/me', authMiddleware, getCurrentUser);
-router.get('/:id', authMiddleware, getUserById);
-router.put('/:id', authMiddleware, updateUserById);
-router.delete('/:id', authMiddleware, deleteUserById);
-
-// Other routes (login, register, etc.)
+router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.post('/register', createUser);
-router.get('/', getAllUsers);
+// GET /api/users/me - Get current authenticated user
+router.get('/me', authMiddleware, getCurrentUser);
+router.get('/profile', authMiddleware, getCurrentUser);
+
+
 
 
 module.exports = router;

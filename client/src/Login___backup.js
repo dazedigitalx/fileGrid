@@ -7,12 +7,12 @@ import './Style.css';
 
 const Login = () => {
     const navigate = useNavigate();
+    const { setUser } = useAuth(); // Destructure setUser function from useAuth
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
-    const { setUser } = useAuth(); // Destructure loginUser function from useAuth
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -29,8 +29,11 @@ const Login = () => {
             if (response.status === 200) {
                 const { token, message, user } = responseData;
 
-                // Update user context with loginUser function
+                // Update user context with setUser function
                 setUser({ ...user, token });
+
+                // Save the token to localStorage
+                localStorage.setItem('accessToken', token);
 
                 // Display success message and clear error
                 setMessage(message);
@@ -63,7 +66,7 @@ const Login = () => {
                 {message && <p className="success-message">{message}</p>}
                 <form onSubmit={handleLogin}>
                     <input
-                        type="username"
+                        type="text"
                         placeholder="Username"
                         id="username"
                         value={username}

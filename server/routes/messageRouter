@@ -1,0 +1,15 @@
+const express = require('express');
+const router = express.Router();
+const authMiddleware = require('../middlewares/authMiddleware');
+const messageController = require('../controllers/messageController');
+
+// Send a new message
+router.post('/send', authMiddleware, messageController.sendMessage);
+
+// GET all messages (Assuming this is for fetching all messages, not sending a new one)
+router.get('/', authMiddleware, messageController.getAllMessages);
+
+// Get messages for a specific channel (Assuming you want messages for a specific channel)
+router.get('/channels/:channelId', authMiddleware, messageController.getChannelMessages);
+
+module.exports = router;

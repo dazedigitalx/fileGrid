@@ -1,34 +1,26 @@
 const express = require('express');
 const router = express.Router();
+const authMiddleware = require('../middlewares/authMiddleware'); // Adjust the path as per your actual file structure
 const {
-    createUser,
+    getCurrentUser,
+    loginUser,
+    getAllUsers,
     getUserById,
+    createUser,
     updateUserById,
     deleteUserById,
-    getAllUsers,
-    loginUser, // Import loginUser function from userController
-} = require('../controllers/userController');
+} = require('../controllers/userController'); // Adjust the path as per your actual file structure
 
+// Apply authMiddleware to routes that need authentication
+router.get('/me', authMiddleware, getCurrentUser);
+router.get('/:id', authMiddleware, getUserById);
+router.put('/:id', authMiddleware, updateUserById);
+router.delete('/:id', authMiddleware, deleteUserById);
 
-
-
-
-// Login route
+// Other routes (login, register, etc.)
 router.post('/login', loginUser);
-
-// GET all users
+router.post('/register', createUser);
 router.get('/', getAllUsers);
 
-// GET user by ID
-router.get('/:id', getUserById);
-
-// // POST create new user
-router.post('/register', createUser);
-
-// PUT update user by ID
-router.put('/:id', updateUserById);
-
-// DELETE delete user by ID
-router.delete('/:id', deleteUserById);
 
 module.exports = router;

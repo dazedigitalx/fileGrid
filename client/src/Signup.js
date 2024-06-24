@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+// import './Signup.css';
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -19,20 +21,17 @@ const Signup = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:5000/api/users/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, email, password }), // Sending plaintext password
+            const response = await axios.post('http://localhost:5000/api/users/register', {
+                username,
+                email,
+                password,
             });
 
-            if (response.ok) {
+            if (response.status === 200) {
                 // Successful signup, navigate to login page
                 navigate('/login');
             } else {
-                const data = await response.json();
-                setError(data.message || 'Failed to sign up.');
+                setError(response.data.message || 'Failed to sign up.');
             }
         } catch (error) {
             console.error('Signup error:', error);

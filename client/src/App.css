@@ -1,4 +1,11 @@
 /* Main content */
+
+body {
+    margin: 0; /* Remove default margin */
+    padding: 0; /* Remove default padding */
+  }
+
+  
 .main-content {
     margin-left: 250px; /* Space for the expanded sidebar */
     transition: margin-left 0.3s ease; /* Smooth transition for margin change */

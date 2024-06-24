@@ -1,9 +1,5 @@
-// middlewares/authMiddleware.js
-
+// Example authentication middleware setting req.user after decoding JWT
 const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
-
-dotenv.config();
 
 const authMiddleware = (req, res, next) => {
     const authHeader = req.header('Authorization');
@@ -20,17 +16,12 @@ const authMiddleware = (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // Ensure `decoded` contains `{ id, username, email }`
-
-        // Logging for debugging purposes
-//         console.log('Token:', token);
-//         console.log('Decoded:', decoded);
-// /
-
+        req.user = decoded; // Set decoded user information on req.user
+        console.log('Current user:', req.user); // Verify user information
         next();
     } catch (error) {
+        res.status(401).send('Invalid token');
         console.error('Error verifying token:', error);
-        return res.status(401).send('Invalid token');
     }
 };
 

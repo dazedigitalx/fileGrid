@@ -25,6 +25,7 @@ button:hover {
 }
 
 /* General styling for input fields */
+input[type=""],
 input[type="text"],
 input[type="username"],
 input[type="email"],
@@ -32,9 +33,11 @@ input[type="password"] {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 20px;
-  font-size: 1rem;
+  font-size: 1.5rem;
   transition: border-color 0.3s;
   margin-bottom: 20px;
+  margin-top: 20px;
+
 }
 
 input[type="text"]:focus,

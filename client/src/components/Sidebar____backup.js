@@ -1,28 +1,29 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import './Sidebar.css'; // Import the CSS file
+import React, { useState } from 'react';
+import './Sidebar.css'; // Adjust styles as needed
+import Channels from './Channels'; // Import Channels component
 
-const Sidebar = ({ collapsed, toggleSidebar }) => {
-    return (
-        <nav className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
-            <div className="sidebar-content">
-                <button className="toggle-button" onClick={toggleSidebar}>
-                    {collapsed ? <>&#9654;</> : <>&#9660;</>}
-                </button>
-                {!collapsed && (
-                    <>
-                        <h1>Sidebar</h1>
-                        <ul>
-                            <li><Link to="/">Home</Link></li>
-                            <li><Link to="/login">Login</Link></li>
-                            <li><Link to="/signup">Signup</Link></li>
-                            <li><Link to="/dashboard">Dashboard</Link></li>
-                        </ul>
-                    </>
-                )}
-            </div>
-        </nav>
-    );
+const Sidebar = ({ isOpen, toggleSidebar, onChannelSelect }) => {
+  const [selectedChannel, setSelectedChannel] = useState(null); // State to track selected channel
+
+  // Function to handle selecting a channel
+  const handleChannelSelect = (channel) => {
+    setSelectedChannel(channel);
+    onChannelSelect(channel); // Pass selected channel to parent component
+  };
+
+  return (
+    <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
+      <button className="toggle-button" onClick={toggleSidebar}>
+        {isOpen ? 'Collapse' : 'Expand'}
+      </button>
+      <ul className="menu">
+        <li>Menu Item 1</li>
+        <li>Menu Item 2</li>
+        <li>Menu Item 3</li>
+      </ul>
+      <Channels onSelect={handleChannelSelect} />
+    </div>
+  );
 };
 
 export default Sidebar;

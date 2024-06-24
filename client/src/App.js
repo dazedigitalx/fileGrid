@@ -4,10 +4,11 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
 import PrivateRoute from './PrivateRoute';
 import Dashboard from './components/Dashboard';
+import Profile from './components/Profile';
+
 import Login from './Login';
 import Signup from './Signup';
 import Home from './Home';
-// import Users from './components/Users';
 import './App.css';
 
 const App = () => {
@@ -15,16 +16,13 @@ const App = () => {
     <Router>
       <AuthProvider>
         <div className="App">
-
-
-          {/* Routes for main content */}
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            {/* <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} /> */}
             <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-            {/* <Route path="/users" element={<Users /> } /> */}
+            <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+
           </Routes>
         </div>
       </AuthProvider>

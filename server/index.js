@@ -2,14 +2,16 @@ const express = require('express');
 const dotenv = require('dotenv');
 const mysql = require('mysql2');
 const cors = require('cors');
-const { Promise } = require('bluebird'); // Import bluebird for promises
+const { Promise } = require('bluebird');
 
+// Import routers and middleware
 const userRouter = require('./routes/userRouter');
-const authMiddleware = require('./middlewares/authMiddleware');
-const { getCurrentUser } = require('./controllers/userController');
-const noteRouter = require('./routes/noteRouter');
-const chatRouter = require('./routes/chatRouter'); // Import your chat router
+const fileRouter = require('./routes/fileRouter');
+const channelRouter = require('./routes/channelRouter'); // Import channelRouter
+const messageRouter = require('./routes/messageRouter'); // Import channelRouter
 
+// auth middleware
+const authMiddleware = require('./middlewares/authMiddleware');
 
 
 // Load environment variables
@@ -17,11 +19,12 @@ dotenv.config();
 
 const app = express();
 
-// Middleware for parsing JSON bodies
+// Middleware setup
 app.use(express.json());
-
-// Enable all CORS requests (for development; tighten in production)
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_ORIGIN,
+    credentials: true
+}));
 
 // Database connection pool with promise support
 const pool = mysql.createPool({
@@ -32,41 +35,27 @@ const pool = mysql.createPool({
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    Promise: Promise // Set Promise to bluebird Promise
+    Promise: Promise
 });
 
-module.exports = pool.promise(); // Export promise-enabled pool
-
-// Testing the database connection
-pool.getConnection((err, connection) => {
-    if (err) {
-        console.error('Error connecting to MySQL:', err);
-        return;
-    }
-    console.log('Connected to MySQL database');
-    connection.release(); // Release the connection back to the pool
-});
-
-// Make pool accessible to router
+// Make pool accessible to routers via req object
 app.use((req, res, next) => {
     req.pool = pool;
     next();
 });
 
-
-// Mount chatRouter for handling chat routes
-app.use('/api/chat', authMiddleware, chatRouter);
-
-// GET /api/users/me - Get current authenticated user
-app.get('/api/users/me', authMiddleware, getCurrentUser);
-
-// Mount userRouter for handling user routes
+// Mount routers
 app.use('/api/users', userRouter);
+app.use('/api/files', authMiddleware, fileRouter); // Protected by authMiddleware
+app.use('/api/channels', authMiddleware, channelRouter); // Protected by authMiddleware
+app.use('/api/messages', authMiddleware, messageRouter); // Protected by authMiddleware
 
-// Mount noteRouter for handling note routes
-app.use('/api/notes', authMiddleware, noteRouter);
 
-
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Internal Server Error');
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;

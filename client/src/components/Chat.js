@@ -1,151 +1,104 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../AuthContext';
-import './Chat.css'; // Ensure to import your CSS file for styling
+import React, { useState, useEffect } from 'react';
+import './Chat.css'; // Import or adjust styles as needed
+import { useAuth } from '../AuthContext'; // Adjust the path based on your context
 
-const Chat = ({ user }) => {
-    const [chatMessages, setChatMessages] = useState([]);
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(false);
+const Chat = ({ channel }) => {
+    const { user } = useAuth(); // Assuming useAuth provides user info including token
+    const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
-    const messagesEndRef = useRef(null);
+    const [error, setError] = useState(null);
 
-    const fetchChatMessages = async () => {
-        setLoading(true);
-        setError(null); // Clear previous error
-        try {
-            const response = await fetch('http://localhost:5000/api/chat/messages', {
-                headers: {
-                    'Authorization': `Bearer ${user.token}`,
-                    'Content-Type': 'application/json',
-                },
-            });
+    useEffect(() => {
+        const fetchMessages = async () => {
+            if (!channel || !user || !user.token) return; // Check if channel and user token exist
 
-            if (response.ok) {
+            try {
+                const response = await fetch(`http://localhost:5000/api/channels/${channel.id}/messages`, {
+                    headers: {
+                        'Authorization': `Bearer ${user.token}`, // Include user token in the Authorization header
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch messages: ${response.statusText}`);
+                }
+
                 const data = await response.json();
-                // Filter messages to display only those from the authenticated user
-                const userMessages = data.filter(message => message.userId === user.id);
-                setChatMessages(userMessages);
-            } else {
-                setError(`Failed to fetch chat messages: ${response.statusText}`);
+                setMessages(data);
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+                setError(`Error fetching messages: ${error.message}`);
             }
-        } catch (error) {
-            setError(`Error fetching chat messages: ${error.message}`);
-        } finally {
-            setLoading(false);
-        }
-    };
+        };
 
-    useEffect(() => {
-        fetchChatMessages();
-    }, []); // Only run once on component mount
+        fetchMessages(); // Fetch messages when the component mounts or when channel changes
+    }, [channel, user]);
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [chatMessages]);
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    const handleSendMessage = async () => {
-        try {
-            const response = await fetch('http://localhost:5000/api/chat/messages', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${user.token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    userId: user.id,
-                    senderId: user.id, // Assuming senderId is the same as userId
-                    recipientId: user.id, // Replace with recipientId if available
-                    message: newMessage,
-                    created_at: new Date().toISOString(),
-                }),
-            });
-
-            if (response.ok) {
-                console.log('Message sent successfully');
-                const sentMessage = {
-                    id: Date.now(), // Generate a unique id for the new message
-                    userId: user.id,
-                    senderId: user.id,
-                    recipientId: user.id, // Replace with actual recipientId if available
-                    message: newMessage,
-                    created_at: new Date().toISOString(),
-                };
-                setChatMessages([...chatMessages, sentMessage]); // Update state with new message
-                setNewMessage(''); // Clear input after sending
-            } else {
-                console.error('Failed to send message:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error sending message:', error);
-        }
-    };
-
-    const handleDeleteMessage = async (messageId) => {
-        try {
-            const response = await fetch(`http://localhost:5000/api/chat/messages/${messageId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${user.token}`,
-                },
-            });
-
-            if (response.ok) {
-                console.log('Message deleted successfully');
-                // Remove the deleted message from state
-                const updatedMessages = chatMessages.filter(message => message.id !== messageId);
-                setChatMessages(updatedMessages);
-            } else {
-                console.error('Failed to delete message:', response.statusText);
-            }
-        } catch (error) {
-            console.error('Error deleting message:', messageId);
-        }
-    };
-
-    const handleKeyPress = (e) => {
-        if (e.key === 'Enter') {
-            handleSendMessage();
-        }
-    };
+    const handleSendMessage = async (e) => {
+      e.preventDefault();
+  
+      try {
+          if (!user || !user.token) {
+              throw new Error('User not authenticated or token not available');
+          }
+  
+          if (!channel) {
+              throw new Error('No active channel selected');
+          }
+  
+          const response = await fetch('http://localhost:5000/api/messages/send', {
+              method: 'POST',
+              headers: {
+                  'Authorization': `Bearer ${user.token}`,
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                  channelId: channel.id,
+                  message: newMessage,
+                  created_at: new Date().toISOString(), // Example field if required by API
+              }),
+          });
+  
+          if (!response.ok) {
+              throw new Error(`Failed to send message: ${response.statusText}`);
+          }
+  
+          const sentMessage = await response.json();
+          setMessages(prevMessages => [...prevMessages, sentMessage]);
+          setNewMessage(''); // Clear newMessage state after sending
+      } catch (error) {
+          console.error('Error sending message:', error); // Log error to console
+          setError(`Error sending message: ${error.message}`);
+      }
+  };
+  
+  
+  
 
     return (
-        <div className="chat-content">
-        <div className="chat-container">
-            <div className="messages-container">
-                {loading ? (
-                    <p>Loading chat messages...</p>
-                ) : error ? (
-                    <p className="error-message">{error}</p>
-                ) : (
-                    chatMessages.map(message => (
-                        <div key={message.id} className="message">
-                            <div className="message-content">{message.message}</div>
-                            <div className="message-info">
-                                <span className="message-user-id">From User ID: {message.userId}</span>
-                                <span className="message-timestamp">Timestamp: {message.created_at}</span>
-                                <button onClick={() => handleDeleteMessage(message.id) } className="delete-button">x</button>
-                                </div>
-                        </div>
-                    ))
-                )}
-                <div ref={messagesEndRef} />
+        <div className="chat">
+            <h2>Channel: {channel.name}</h2>
+            {error && <div className="error">Error: {error}</div>}
+            <div className="messages">
+                {messages.map(message => (
+                    <div key={message.id}>
+                        <strong>{message.senderId}</strong>: {message.content}
+                    </div>
+                ))}
             </div>
-            <div className="input-container">
-                <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Type a message..."
-                    className="message-input"
-                />
-                <button onClick={handleSendMessage} className="send-button">Send</button>
-            </div>
-        </div>
+            <form onSubmit={handleSendMessage}>
+                <label>
+                    New Message:
+                    <input
+                        type="text"
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        required
+                    />
+                </label>
+                <button type="submit">Send</button>
+            </form>
         </div>
     );
 };

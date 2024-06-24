@@ -1,145 +1,93 @@
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const pool = require('../database').promise(); // Import mysql2 promise wrapper explicitly
+// controllers/userController.js
 
-const getCurrentUser = async (req, res) => {
-    const userId = req.user.userId; // Ensure you are using userId as per your token structure
-    console.log('Extracted userId:', userId);
+const pool = require('../database');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+const registerUser = async (req, res) => {
+    const { username, email, password } = req.body;
+    
+    if (!username || !email || !password) {
+        return res.status(400).json({ message: 'All fields are required' });
+    }
 
     try {
-        // Fetch user details from the database
-        const [rows] = await pool.query('SELECT id, username, email FROM users WHERE id = ?', [userId]);
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await pool.query('INSERT INTO Users (username, email, password) VALUES (?, ?, ?)', [username, email, hashedPassword]);
+        res.status(201).json({ message: 'User registered successfully' });
+    } catch (error) {
+        console.error('Error registering user:', error);
+        res.status(500).json({ message: 'Failed to register user' });
+    }
+};
+
+const loginUser = async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    try {
+        const [rows] = await pool.query('SELECT * FROM Users WHERE email = ?', [email]);
         if (rows.length === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
 
         const user = rows[0];
-        res.json(user);
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
+
+        const token = jwt.sign({ id: user.id, email: user.email, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.json({ id: user.id, username: user.username, email: user.email, token });
     } catch (error) {
-        console.error('Error fetching user details:', error);
-        res.status(500).json({ message: 'Failed to fetch user details' });
+        console.error('Error logging in user:', error);
+        res.status(500).json({ message: 'Failed to login user' });
     }
 };
 
 
-// POST /api/users/login - Login user
-const loginUser = async (req, res) => {
-    const { username, password } = req.body;
 
+
+// Example function to get current authenticated user
+const getCurrentUser = (req, res) => {
     try {
-        // Check if username and password are provided
-        if (!username || !password) {
-            return res.status(400).json({ message: 'Username and password are required' });
-        }
+        const { id, email, username } = req.user; // Assuming user information is decoded from JWT
 
-        // Retrieve user from database by username
-        const [rows] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
+        console.log('Current user:', { id, email, username }); // Verify user information
 
-        if (rows.length === 0) {
-            return res.status(401).json({ message: 'User not found or incorrect credentials' });
-        }
+        // Return user data in response
+        res.status(200).json({ id, email, username });
 
-        const user = rows[0];
-
-        // Compare hashed password
-        const isPasswordMatch = await bcrypt.compare(password, user.password);
-
-        if (!isPasswordMatch) {
-            return res.status(401).json({ message: 'User not found or incorrect credentials' });
-        }
-
-        // Generate JWT token
-        const token = jwt.sign({ userId: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-        // Return success response with token
-        res.status(200).json({
-            message: 'Login successful',
-            token,
-            user: { id: user.id, username: user.username, email: user.email }
-        });
-    } catch (err) {
-        console.error('Error logging in:', err);
-        res.status(500).json({ message: `Error logging in: ${err.message}` });
+    } catch (error) {
+        console.error('Error getting current user:', error);
+        res.status(500).json({ message: 'Failed to get current user' });
     }
 };
 
-// GET /api/users - Get all users
-const getAllUsers = async (req, res) => {
+
+const getUserProfile = (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT id, username, email FROM users');
-        res.json(rows);
-    } catch (err) {
-        console.error('Error fetching users:', err);
-        res.status(500).json({ message: `Error fetching users: ${err.message}` });
+        const { id, email, username } = req.user; // Assuming user information is decoded from JWT
+
+        console.log('User Profile :', { id, email, username }); // Verify user information
+
+        // Return user data in response
+        res.status(200).json({ id, email, username });
+
+    } catch (error) {
+        console.error('Error getting current user:', error);
+        res.status(500).json({ message: 'Failed to get current user' });
     }
 };
 
-// GET /api/users/:id - Get user by ID
-const getUserById = async (req, res) => {
-    const userId = req.params.id;
-    try {
-        const [rows] = await pool.query('SELECT id, username, email FROM users WHERE id = ?', [userId]);
-        if (rows.length === 0) {
-            res.status(404).json({ message: 'User not found' });
-        } else {
-            res.json(rows[0]);
-        }
-    } catch (err) {
-        console.error('Error fetching user:', err);
-        res.status(500).json({ message: `Error fetching user: ${err.message}` });
-    }
-};
-
-// POST /api/users - Create new user
-const createUser = async (req, res) => {
-    const { username, email, password } = req.body;
-    try {
-        // Hash the password before storing it
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const [results] = await pool.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [username, email, hashedPassword]);
-        res.status(201).json({ message: 'User added successfully', userId: results.insertId });
-    } catch (err) {
-        console.error('Error adding user:', err);
-        res.status(500).json({ message: `Error adding user: ${err.message}` });
-    }
-};
-
-// PUT /api/users/:id - Update user by ID
-const updateUserById = async (req, res) => {
-    const userId = req.params.id;
-    const { username, email, password } = req.body;
-    try {
-        // Hash the password if provided before updating
-        let hashedPassword = password;
-        if (password) {
-            hashedPassword = await bcrypt.hash(password, 10);
-        }
-        const [results] = await pool.query('UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?', [username, email, hashedPassword, userId]);
-        res.json({ message: `User ${userId} updated successfully` });
-    } catch (err) {
-        console.error('Error updating user:', err);
-        res.status(500).json({ message: `Error updating user: ${err.message}` });
-    }
-};
-
-// DELETE /api/users/:id - Delete user by ID
-const deleteUserById = async (req, res) => {
-    const userId = req.params.id;
-    try {
-        const [results] = await pool.query('DELETE FROM users WHERE id = ?', [userId]);
-        res.json({ message: `User ${userId} deleted successfully` });
-    } catch (err) {
-        console.error('Error deleting user:', err);
-        res.status(500).json({ message: `Error deleting user: ${err.message}` });
-    }
-};
 
 module.exports = {
-    getCurrentUser,
+    registerUser,
     loginUser,
-    getAllUsers,
-    getUserById,
-    createUser,
-    updateUserById,
-    deleteUserById,
+    getCurrentUser,
+    getUserProfile
 };

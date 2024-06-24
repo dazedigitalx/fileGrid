@@ -1,25 +1,23 @@
-// Sidebar.js
 import React from 'react';
-import { Link } from 'react-router-dom';
-import Channels from './Channels';
-import './Sidebar.css'; // Import the CSS file
+import './Sidebar.css'; // Import or adjust styles as needed
+import Channels from './Channels'; // Import Channels component
 
-const Sidebar = ({ collapsed, toggleSidebar, onChannelSelect }) => {
+const Sidebar = ({ isOpen, toggleSidebar, channels, passActiveChannel, handleCreateChannel }) => {
     return (
-        <nav className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
-            <div className="sidebar-content">
-                <button className="toggle-button" onClick={toggleSidebar}>
-                    {collapsed ? <>&#9654;</> : <>&#9660;</>}
-                </button>
-                {!collapsed && (
-                    <>
-                        <h1>Sidebar</h1>
-
-                        <Channels onChannelSelect={onChannelSelect} />
-                    </>
-                )}
-            </div>
-        </nav>
+        <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
+            <button className="toggle-button" onClick={toggleSidebar}>
+                {isOpen ? 'Collapse' : 'Expand'}
+            </button>
+            <ul className="menu">
+                <li>Menu Item 1</li>
+                <li>Menu Item 2</li>
+                <li>Menu Item 3</li>
+            </ul>
+            {/* Render Channels component with props */}
+            <Channels channels={channels} passActiveChannel={passActiveChannel} />
+            {/* Create New Channel Button */}
+            <button onClick={handleCreateChannel}>Create New Channel</button>
+        </div>
     );
 };
 

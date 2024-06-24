@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from './AuthContext'; // Ensure you import useAuth
-
 import './Login.css';
 import './Style.css';
 
@@ -16,6 +15,10 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        console.log('Login form submitted');
+        console.log('Email:', email);
+        console.log('Username:', username);
+        console.log('Password:', password);
 
         try {
             const response = await fetch('http://localhost:5000/api/users/login', {
@@ -25,18 +28,22 @@ const Login = () => {
             });
 
             const responseData = await response.json();
+            console.log('Response data:', responseData);
 
             if (response.status === 200) {
-                const { token, message, user } = responseData;
+                const { token, id, username, email } = responseData;
+
+                console.log('Login successful:', 'User logged in successfully');
+                console.log('User data:', { id, username, email });
 
                 // Update user context with setUser function
-                setUser({ ...user, token });
+                setUser({ id, username, email, token });
 
                 // Save the token to localStorage
                 localStorage.setItem('accessToken', token);
 
                 // Display success message and clear error
-                setMessage(message);
+                setMessage('User logged in successfully');
                 setError('');
 
                 // Redirect to dashboard after successful login
@@ -58,6 +65,7 @@ const Login = () => {
             <div className="card-image">
                 <div className="card-welcome">
                     <h1>Login</h1>
+                    <Link to="/signup" className="register-button">Register</Link>
                 </div>
             </div>
             <div className="card-content">
