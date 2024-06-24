@@ -14,8 +14,8 @@ button {
   border: none;
   background-color: #4CAF50;
   color: white;
-  font-size: 1rem;
-  border-radius: 20px;
+  font-size: 1.2rem;
+  border-radius: 200px;
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
 }
@@ -32,11 +32,13 @@ input[type="email"],
 input[type="password"] {
   padding: 10px;
   border: 1px solid #ccc;
-  border-radius: 20px;
-  font-size: 1.5rem;
+  border-radius: 200px;
+  font-size: 1.2rem;
   transition: border-color 0.3s;
-  margin-bottom: 20px;
-  margin-top: 20px;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  padding: 10px 20px; /* Adjust padding values as needed */
+
 
 }
 

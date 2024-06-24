@@ -24,10 +24,7 @@ const Header = () => {
             )}
 
             <nav className='navbar'>
-                {/* Navigation links */}
-                <ul className='nav-links'>
-                    <Nav />                    {/* Add other header links as needed */}
-                </ul>
+            <Nav />   {/* Add other header links as needed */}
             </nav>
         </header>
     );

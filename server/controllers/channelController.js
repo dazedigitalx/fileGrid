@@ -48,26 +48,10 @@ const getChannelMessages = async (req, res) => {
 
 
 
-// Add a message to a channel
-// Add a message to a channel
-const sendMessage = async (req, res) => {
-    const { channelId } = req.params;
-    const { message } = req.body;
-    const userId = req.user.id; // Assuming user information is decoded from JWT
 
-    try {
-        const [result] = await pool.query('INSERT INTO messages (channel_Id, user_Id, context, created_At) VALUES (?, ?, ?, NOW())', [channelId, userId, message]);
-        const newMessage = { id: result.insertId, channel_Id, user_Id, context, created_At: new Date() };
-        res.status(201).json(newMessage);
-    } catch (error) {
-        console.error('Error adding message to channel:', error);
-        res.status(500).json({ message: 'Failed to add message' });
-    }
-};
 
 module.exports = {
     createChannel,
     getUserChannels,
-    getChannelMessages,
-    sendMessage,
+    getChannelMessages
 };

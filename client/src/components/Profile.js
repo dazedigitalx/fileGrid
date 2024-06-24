@@ -4,7 +4,7 @@ import Sidebar from './Sidebar';
 import UserProfile from './UserProfile'
 import './Dashboard.css'; // Ensure correct import path for CSS
 
-const Dashboard = () => {
+const Profile = () => {
     const [sidebarOpen, setSidebarOpen] = useState(true);
 
     const toggleSidebar = () => {
@@ -13,7 +13,6 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard">
-            <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
             <div className={`dashboard-content ${sidebarOpen ? 'expanded' : ''}`}>
                 <Header />
                 <div className={`dashboard-main ${sidebarOpen ? '' : 'contracted'}`}>
@@ -26,4 +25,4 @@ const Dashboard = () => {
     );
 };
 
-export default Dashboard;
+export default Profile;

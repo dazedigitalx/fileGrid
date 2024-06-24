@@ -13,6 +13,5 @@ router.get('/', authMiddleware, channelController.getUserChannels);
 router.get('/:channelId/messages', authMiddleware, channelController.getChannelMessages);
 
 // Add a message to a channel
-router.post('/:channelId/messages', authMiddleware, channelController.sendMessage);
 
 module.exports = router;

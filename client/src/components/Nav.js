@@ -18,13 +18,7 @@ const Nav = () => {
     return (
         <nav className="nav">
             <ul>
-                <li>
-                    <Link
-                        to="/"
-                        className={`nav-link ${isActive('/') ? (user ? 'auth-active' : 'active') : ''}`}
-                    >
-                    </Link>
-                </li>
+
                 <li>
                     <Link
                         to="/dashboard"

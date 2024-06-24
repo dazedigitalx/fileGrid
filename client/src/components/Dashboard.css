@@ -30,7 +30,7 @@
 
 .dashboard-content {
   flex: 1; /* Take remaining space */
-  padding: 20px;
+  padding: 00px;
   transition: margin-left 0.3s ease; /* Transition for main content margin */
 }
 
@@ -39,7 +39,7 @@
 }
 
 .dashboard-header {
-  padding: 10px;
+  padding: 0px;
   background-color: #f0f0f0;
   border-bottom: 1px solid #ccc;
 }

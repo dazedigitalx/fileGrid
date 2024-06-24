@@ -1,4 +1,11 @@
 /* Global styles */
+
+/* target all buttons */
+button {
+    font-size: 1.2em;
+    border-radius: 200px;
+  }
+
 * {
     margin: 0;
     padding: 0;
